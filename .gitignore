@@ -1,35 +1,37 @@
-# Gradle files
+# Gradle and Kotlin caches, generated build output
 .gradle/
-build/
 .kotlin/
+**/build/
 
-# Local configuration file (sdk path, etc)
+# Machine-specific Android SDK and IDE configuration
 local.properties
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
 
-# Log/OS Files
-*.log
-
-# Android Studio generated files and folders
-captures/
+# Native builds, profiling, and logs
 .externalNativeBuild/
 .cxx/
-*.aab
+captures/
+*.hprof
+*.log
+
+# Generated packages and signing secrets
 *.apk
-output-metadata.json
-
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
-
-# Keystore files
+*.aab
+*.apks
 *.jks
 *.keystore
+keystore.properties
+signing.properties
 
-# Google Services (e.g. APIs or Firebase)
+# Local environment and service credentials
+.env
+.env.*
+!.env.example
 google-services.json
 
-# Android Profiling
-*.hprof
+# Keep the Gradle wrapper in version control, including its JAR.
+!gradle/wrapper/gradle-wrapper.jar
