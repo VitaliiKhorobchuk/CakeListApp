@@ -1,9 +1,9 @@
 <resources>
     <string name="app_name">CakeListApp</string>
+    <string name="cakes_title">Cakes</string>
     <string name="loading_cakes">Loading cakes…</string>
     <string name="cakes_load_error">Could not load cakes. Please try again later.</string>
-    <plurals name="cakes_loaded">
-        <item quantity="one">%d cake loaded</item>
-        <item quantity="other">%d cakes loaded</item>
-    </plurals>
+    <string name="empty_cake_list">No cakes available.</string>
+    <string name="show_cake_description">Show description</string>
+    <string name="close">Close</string>
 </resources>

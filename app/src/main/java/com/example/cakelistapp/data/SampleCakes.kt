@@ -20,10 +20,9 @@ object SampleCakes {
         imageUrl = "https://img.delicious.com.au/xRc0uydo/del/2015/10/dundee-cake-10249-1.jpg",
     )
 
-    val unsortedWithDuplicates: List<Cake> = listOf(
+    val cakes: List<Cake> = listOf(
         lemonCheesecake,
         bananaCake,
         dundeeCake,
-        bananaCake,
     )
 }

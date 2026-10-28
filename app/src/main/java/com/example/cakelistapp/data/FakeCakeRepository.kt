@@ -6,7 +6,7 @@ import java.io.IOException
 import kotlinx.coroutines.delay
 
 class FakeCakeRepository(
-    private val cakes: List<Cake> = SampleCakes.unsortedWithDuplicates,
+    private val cakes: List<Cake> = SampleCakes.cakes,
     private val shouldFail: Boolean = false,
     private val delayMillis: Long = 500L,
 ) : CakeRepository {
