@@ -10,19 +10,26 @@ import com.google.gson.JsonParseException
 import com.google.gson.stream.MalformedJsonException
 import java.io.EOFException
 import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 
 class RemoteCakeRepository(private val api: CakeApi) : CakeRepository {
     override suspend fun getCakes(): List<Cake> {
         try {
             val response = api.getCakes()
-                ?: throw CakeLoadException(CakeLoadError.INVALID_DATA)
-            return response.map { dto ->
+            if (!response.isSuccessful) throw HttpException(response)
+            val cakes = response.body() ?: throw CakeLoadException(CakeLoadError.INVALID_DATA)
+            return cakes.map { dto ->
                 dto?.toDomain() ?: throw CakeLoadException(CakeLoadError.INVALID_DATA)
             }
+        } catch (exception: CancellationException) {
+            throw exception
         } catch (exception: HttpException) {
             throw CakeLoadException(CakeLoadError.SERVER, exception)
         } catch (exception: JsonParseException) {
+            throw CakeLoadException(CakeLoadError.INVALID_DATA, exception)
+        } catch (exception: IllegalStateException) {
+            // Gson reports an unexpected JSON container (for example an object instead of a list) this way.
             throw CakeLoadException(CakeLoadError.INVALID_DATA, exception)
         } catch (exception: MalformedJsonException) {
             throw CakeLoadException(CakeLoadError.INVALID_DATA, exception)
