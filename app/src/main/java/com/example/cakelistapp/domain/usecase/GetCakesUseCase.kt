@@ -6,6 +6,8 @@ import com.example.cakelistapp.domain.repository.CakeRepository
 class GetCakesUseCase(
     private val repository: CakeRepository,
 ) {
-    // TODO: Apply duplicate removal and title sorting when business rules are implemented.
+    // Cake equality includes the title, description, and image URL.
     suspend operator fun invoke(): List<Cake> = repository.getCakes()
+        .distinct()
+        .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
 }

@@ -44,7 +44,7 @@ fun CakeListScreen(
     uiState: CakeListUiState,
     modifier: Modifier = Modifier,
 ) {
-    var selectedCakeTitle by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedCakeIndex by rememberSaveable { mutableStateOf<Int?>(null) }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -68,7 +68,7 @@ fun CakeListScreen(
                 } else {
                     CakeList(
                         cakes = uiState.cakes,
-                        onCakeClick = { cake -> selectedCakeTitle = cake.title },
+                        onCakeClick = { index -> selectedCakeIndex = index },
                         modifier = contentModifier,
                     )
                 }
@@ -83,10 +83,10 @@ fun CakeListScreen(
     }
 
     if (uiState is CakeListUiState.Content) {
-        uiState.cakes.firstOrNull { it.title == selectedCakeTitle }?.let { cake ->
+        selectedCakeIndex?.let { uiState.cakes.getOrNull(it) }?.let { cake ->
             CakeDescriptionDialog(
                 cake = cake,
-                onDismiss = { selectedCakeTitle = null },
+                onDismiss = { selectedCakeIndex = null },
             )
         }
     }
@@ -95,15 +95,15 @@ fun CakeListScreen(
 @Composable
 private fun CakeList(
     cakes: List<Cake>,
-    onCakeClick: (Cake) -> Unit,
+    onCakeClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(vertical = 8.dp),
     ) {
-        itemsIndexed(cakes, key = { _, cake -> cake.title }) { index, cake ->
-            CakeListItem(cake = cake, onClick = { onCakeClick(cake) })
+        itemsIndexed(cakes) { index, cake ->
+            CakeListItem(cake = cake, onClick = { onCakeClick(index) })
             if (index < cakes.lastIndex) {
                 HorizontalDivider(modifier = Modifier.padding(start = 104.dp, end = 16.dp))
             }
@@ -125,9 +125,9 @@ private fun CakeListContent(
 }
 
 private val previewCakes = listOf(
-    Cake("Lemon Cheesecake", "A cheesecake made of lemon", ""),
     Cake("Banana Cake", "A banana cake", ""),
     Cake("Dundee Cake", "A staple with Dundonians", ""),
+    Cake("Lemon Cheesecake", "A cheesecake made of lemon", ""),
 )
 
 @Preview(showBackground = true)

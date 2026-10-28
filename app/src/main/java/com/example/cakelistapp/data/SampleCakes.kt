@@ -24,5 +24,6 @@ object SampleCakes {
         lemonCheesecake,
         bananaCake,
         dundeeCake,
+        bananaCake.copy(),
     )
 }
