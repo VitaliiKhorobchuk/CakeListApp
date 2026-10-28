@@ -13,6 +13,8 @@ import java.io.IOException
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
 
+// TODO: If offline use becomes a requirement, add a local cache with an explicit freshness
+// policy. Today process recreation fetches again and unavailable connectivity shows an error.
 class RemoteCakeRepository(private val api: CakeApi) : CakeRepository {
     override suspend fun getCakes(): List<Cake> {
         try {
@@ -30,6 +32,8 @@ class RemoteCakeRepository(private val api: CakeApi) : CakeRepository {
             throw CakeLoadException(CakeLoadError.INVALID_DATA, exception)
         } catch (exception: IllegalStateException) {
             // Gson reports an unexpected JSON container (for example an object instead of a list) this way.
+            // TODO: Translate parsing failures inside a converter so unrelated IllegalStateExceptions
+            // are not misclassified as invalid API data when this repository grows.
             throw CakeLoadException(CakeLoadError.INVALID_DATA, exception)
         } catch (exception: MalformedJsonException) {
             throw CakeLoadException(CakeLoadError.INVALID_DATA, exception)

@@ -9,7 +9,8 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-// TODO: Consider Hilt or Koin for automatic injection and dependency scoping as the future improvement.
+// TODO: As the dependency graph grows, consider Hilt or Koin for scopes and qualifiers;
+// keep a replaceable repository binding so previews and tests can supply local data.
 class AppContainer {
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)

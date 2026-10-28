@@ -38,6 +38,8 @@ class CakeListViewModel(
             } catch (exception: CakeLoadException) {
                 _uiState.value = CakeListUiState.Error(exception.error)
             } catch (_: Exception) {
+                // TODO: Report unexpected failures through an injected logger before showing
+                // the generic error, so programming defects remain diagnosable without logging payloads.
                 _uiState.value = CakeListUiState.Error(CakeLoadError.UNKNOWN)
             }
         }

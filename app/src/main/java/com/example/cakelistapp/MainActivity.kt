@@ -14,6 +14,8 @@ import com.example.cakelistapp.ui.cakes.CakeListViewModel
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // TODO: Introduce an app theme following system dark mode and matching system-bar icon
+        // contrast. The current Compose palette and status-bar styling intentionally stay light.
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
         )
@@ -22,7 +24,8 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             MaterialTheme {
-                // TODO: Implement Hilt or Koin for ViewModel injection for improvement
+                // TODO: If more screens need injected ViewModels, use Hilt or Koin to remove
+                // manual dependency lookup while keeping ViewModels scoped to their owner.
                 val cakeViewModel: CakeListViewModel = viewModel {
                     CakeListViewModel(getCakes)
                 }

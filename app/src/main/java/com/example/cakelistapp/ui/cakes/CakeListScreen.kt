@@ -1,6 +1,8 @@
 package com.example.cakelistapp.ui.cakes
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -21,14 +23,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -93,6 +101,7 @@ fun CakeListScreen(
                     } else {
                         CakeList(
                             cakes = uiState.cakes,
+                            isRefreshing = uiState.isRefreshing,
                             onCakeClick = { cake -> selectedCake = cake },
                             modifier = Modifier.weight(1f),
                         )
@@ -101,7 +110,11 @@ fun CakeListScreen(
             }
             is CakeListUiState.Error -> {
                 CakeListContent(modifier = contentModifier) {
-                    Text(text = stringResource(uiState.error.messageResource()))
+                    Text(
+                        text = stringResource(uiState.error.messageResource()),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center,
+                    )
                     Button(onClick = requestRefresh) {
                         Text(stringResource(R.string.retry))
                     }
@@ -117,6 +130,8 @@ fun CakeListScreen(
     }
 }
 
+// TODO: Once cakes have stable IDs and a local cache, save only the selected ID. Saving full
+// descriptions in the shared saved-state Bundle can exceed its size limit with larger payloads.
 private val selectedCakeSaver = listSaver<Cake?, String>(
     save = { cake -> cake?.let { listOf(it.title, it.description, it.imageUrl) } ?: emptyList() },
     restore = { fields ->
@@ -127,10 +142,33 @@ private val selectedCakeSaver = listSaver<Cake?, String>(
 @Composable
 private fun CakeList(
     cakes: List<Cake>,
+    isRefreshing: Boolean,
     onCakeClick: (Cake) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(vertical = 8.dp)) {
+    val isPreview = LocalInspectionMode.current
+    val entranceOffsetPx = with(LocalDensity.current) { 12.dp.toPx() }
+    val listEntrance = remember { Animatable(if (isPreview || isRefreshing) 1f else 0f) }
+    // Keep existing content visible while refreshing; replay when fresh content arrives.
+    // Ordinary recompositions and scrolling do not restart the animation.
+    LaunchedEffect(isRefreshing, isPreview) {
+        if (isRefreshing || isPreview) {
+            listEntrance.snapTo(1f)
+        } else {
+            listEntrance.snapTo(0f)
+            listEntrance.animateTo(1f, animationSpec = tween(durationMillis = 600))
+        }
+    }
+
+    LazyColumn(
+        modifier = modifier.graphicsLayer {
+            alpha = listEntrance.value
+            translationY = (1f - listEntrance.value) * entranceOffsetPx
+        },
+        contentPadding = PaddingValues(vertical = 8.dp),
+    ) {
+        // TODO: Use server-provided stable IDs as keys to preserve item identity when refresh
+        // inserts or reorders cakes. Titles are not unique, so they are unsafe as keys.
         itemsIndexed(cakes) { index, cake ->
             CakeListItem(cake = cake, onClick = { onCakeClick(cake) })
             if (index < cakes.lastIndex) {
@@ -148,6 +186,8 @@ private fun CakeLoadError.messageResource(): Int = when (this) {
     CakeLoadError.UNKNOWN -> R.string.cakes_load_error
 }
 
+// TODO: Make status content scrollable on short windows or at large font scales, and add
+// Compose UI checks for those layouts, retry, and restoring an open description dialog.
 @Composable
 private fun CakeListContent(
     modifier: Modifier = Modifier,
